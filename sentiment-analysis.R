@@ -7,32 +7,31 @@ library(wordcloud)
 library(RCurl)
 library(ROAuth)
 library(stringr)
-# install.packages("tm.lexicon.GeneralInquirer", repos="http://datacube.wu.ac.at", type="source")
-library(tm.lexicon.GeneralInquirer)
-library(quantmod)
-# install.packages("tm.plugin.sentiment", repos="http://R-Forge.R-project.org")
-library(tm.plugin.sentiment)
+library(ggplot2)
 
 options(RCurlOptions = list(cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl")))
+
 consumer.key <- ""
 consumer.secret <- ""
 access.token <- ""
 access.secret <- ""
-
 setup_twitter_oauth(consumer.key, consumer.secret, access.token, access.secret)
 
 tweets <- searchTwitter("#topic", n = 8000, lang = "en")
-tmp <- tweets
-tmp <- laply(tmp, function(x) x$getText()) # to directly use tweets don't use tmp.
-str(tmp)
-tmp <- tmp[-c(19,26,29,30,49,94)] # each time we use str(tmp) it will return an integer value. Remove that from tmp.
 
-# now remove those same values from "tweets"
-		
-tweets <- tweets[-c(19,26,29,30,49,94)]
-tweets <- ldply(tweets, function(x) x$toDataFrame())
-write.csv(tweets, "tweets.csv")
-tweets <- read.csv("tweets.csv") # reading from csv necessary in order to post on github.All the work before this not to be published.
+# to publish data frame on kaggle.
+tweets.df <- ldply(money, function(x) x$toDataFrame())
+
+# to directly use tweets.
+tweets <- laply(tweets, function(x) x$getText())
+str(tweets)
+tweets <- tweets[-c(19,26,29,30,49,94)] # each time we use str(tweets) it will return an integer value. Remove that from tweets.
+
+write.csv(as.data.frame(tweets), "tweets-file.csv")
+
+# to run rmarkdown, code starts here.
+tweets.df <- read.csv("tweets-file.csv")
+tweets <- as.character(tweets.df$tweets)
 
 sentiment.score <- function(sentences, positive.words, negative.words, .progress='none')
 {
@@ -106,6 +105,13 @@ sentiment.score <- function(sentences, positive.words, negative.words, .progress
 positive <- scan("positive-words.txt", what= "character", comment.char= ";")
 negative <- scan("negative-words.txt", what= "character", comment.char= ";")
 
-tweets.analysis <- sentiment.score(money, positive, negative, .progress="none")
+tweets.analysis <- sentiment.score(tweets, positive, negative, .progress="none")
 str(tweets.analysis)
+
+tweets.analysis$sentiment[tweets.analysis$score == 0] <- "Neutral" 
+tweets.analysis$sentiment[tweets.analysis$score < 0] <- "Negative"
+tweets.analysis$sentiment[tweets.analysis$score > 0] <- "Positive"
+tweets.analysis$sentiment <- factor(tweets.analysis$sentiment)
+
 bag <- tweets.analysis$text
+wordcloud(bag)
