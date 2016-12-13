@@ -17,6 +17,7 @@ access.token <- ""
 access.secret <- ""
 setup_twitter_oauth(consumer.key, consumer.secret, access.token, access.secret)
 
+# get tweets
 tweets <- searchTwitter("#topic", n = 8000, lang = "en")
 
 # to publish data frame on kaggle.
@@ -49,8 +50,11 @@ sentiment.score <- function(sentences, positive.words, negative.words, .progress
 		        
         # remove retweets
         sentence <- gsub('(RT|via)((?:\\b\\W*@\\W+)+)', '', sentence)
-		        
-        # remove at people
+
+        # remove hashtags
+        sentence = gsub('#\\S+', '', sentence)
+
+        # remove mentions
         sentence <- gsub('@\\w+', '', sentence)
 		        
         # remove punctuations
@@ -59,7 +63,7 @@ sentiment.score <- function(sentences, positive.words, negative.words, .progress
         # remove numbers
         sentence <- gsub('[[:digit:]]', '', sentence)
 		        
-        # remove html links
+        # remove URLs
         sentence <- gsub('http[s]?\\w+', '', sentence)
 		        
         # remove extra spaces
