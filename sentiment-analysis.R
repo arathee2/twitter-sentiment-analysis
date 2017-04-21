@@ -7,6 +7,7 @@ library(wordcloud)
 library(RCurl)
 library(ROAuth)
 library(stringr)
+library(plyr)
 library(ggplot2)
 
 options(RCurlOptions = list(cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl")))
