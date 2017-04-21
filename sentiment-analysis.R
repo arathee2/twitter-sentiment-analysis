@@ -12,6 +12,7 @@ library(ggplot2)
 
 options(RCurlOptions = list(cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl")))
 
+# twitter developer account keys specific to your account.
 consumer.key <- ""
 consumer.secret <- ""
 access.token <- ""
@@ -23,6 +24,8 @@ tweets <- searchTwitter("#topic", n = 8000, lang = "en")
 
 # to publish data frame on kaggle.
 tweets.df <- ldply(money, function(x) x$toDataFrame())
+str(tweets.df)
+write.csv(tweets.df, "tweets-file.csv")
 
 # to directly use tweets.
 tweets <- laply(tweets, function(x) x$getText())
